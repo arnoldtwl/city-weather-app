@@ -1,0 +1,79 @@
+/* This is the main stylesheet for the application. */
+
+/* Base setup */
+/* style for the body of the page */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+    color: #333;
+    padding: 0;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+/* Layout setup */
+/* style for the header, main and footer sections */
+header,
+main,
+footer {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header styling */
+/* style for the header section, which covers the background color, text color, padding and text alignment */
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
+}
+
+/* Form and fieldset setup */
+
+form {
+    margin: 20px 0;
+}
+/* style for the form and fieldset elements, which covers the background color, padding, border radius, border color and background color */
+fieldset {
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+
+/* Input and button setup */
+
+input,
+button {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-top: 10px;
+}
+
+button {
+    cursor: pointer;
+    background-color: #008CBA;
+    /* Blue */
+    color: white;
+}
+
+/* Results container setup */
+#resultContainer {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+}
+
+/* Footer setup */
+footer {
+    text-align: center;
+    margin-top: 50px;
+    padding: 20px;
+    background-color: #333;
+    color: #fff;
+}

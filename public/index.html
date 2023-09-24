@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City and Weather Information</title>
+    <meta name="description"
+        content="City and Weather Information page. Get real-time information about any city and its weather in South Africa.">
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+    <!-- the header, main and footer elements are used to structure the page -->
+    <header>
+        <h2>South Africa Cities and Weather Information</h2>
+    </header>
+
+    <main>
+        <p>Welcome to the City and Weather Information page. This page displays information about a city and its weather
+            in South Africa. Use the form below to search for a city and get real-time information about the city and
+            its weather.</p>
+        <!-- the form element is used to create an HTML form for user input -->
+        <form id="cityForm" aria-label="City Information Form">
+            <!-- the fieldset element is used to group related elements in a form -->
+            <fieldset>
+                <!-- the legend element is used to define a caption for the fieldset element -->
+                <legend>City Information Search:</legend>
+                <!-- the label element is used to define a label for an input element -->
+                <label for="cityInput">City Name:</label>
+                <!-- the input element is used to create an input control -->
+                <input type="text" name="city" id="cityInput" placeholder="Enter a city name" required>
+                <!-- the button element is used to create a clickable button -->
+                <button type="submit" name="submit">Submit</button>
+            </fieldset>
+        </form>
+
+        <!-- the div element is used to group block-elements to format them with CSS -->
+        <div id="resultContainer" style="display: none;">
+            <!-- the section element is used to define sections in a document,
+            divide into two sections: city details and weather details -->
+            <section>
+                <h2>City Details:</h2>
+                <p>City Name: <span id="city"></span></p>
+                <p>Province: <span id="province"></span></p>
+                <p>Country: <span id="country"></span></p>
+                <p>Latitude: <span id="latitude"></span></p>
+                <p>Longitude: <span id="longitude"></span></p>
+                <p>Population: <span id="population"></span></p>
+                <!-- <p>Elevation: <span id="elevation"></span></p> -->
+            </section>
+
+            <section>
+                <h2>Weather Details:</h2>
+                <p>Current Temperature: <span id="temperature"></span></p>
+                <p>Current Weather: <span id="weather"></span></p>
+            </section>
+        </div>
+    </main>
+    
+    <!-- the footer element is used to define a footer for a document or section -->
+    <footer>
+        <p>Created by: Arnold Twala</p>
+        <p>Contact information: <a href="mailto:arnoldtwl@gmail.com">arnoldtwl@gmail.com</a></p>
+    </footer>
+</body>
+
+</html>
