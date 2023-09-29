@@ -3,13 +3,16 @@ import express from 'express';
 import { static as expressStatic } from 'express';
 import fetch from 'node-fetch';
 import 'dotenv/config'
+import cors from 'cors';
 
 /**
  * Creates an instance of the Express application and sets the port to 3000.
  */
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
+// Enable CORS middleware
+app.use(cors());
 
 /**
  * Serves static files from the 'public' directory.
