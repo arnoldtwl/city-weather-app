@@ -1,6 +1,5 @@
 
 import express from 'express';
-import { static as expressStatic } from 'express';
 import fetch from 'node-fetch';
 import 'dotenv/config'
 import cors from 'cors';
@@ -17,7 +16,7 @@ app.use(cors());
 /**
  * Serves static files from the 'public' directory.
  */
-app.use(expressStatic('public'));
+app.use(express.static('public'));
 
 
 /**
