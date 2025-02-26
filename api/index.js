@@ -1,4 +1,3 @@
-
 import express from 'express';
 import fetch from 'node-fetch';
 import 'dotenv/config'
@@ -17,7 +16,6 @@ app.use(cors());
  * Serves static files from the 'public' directory.
  */
 app.use(express.static('public'));
-
 
 /**
  * Retrieves city and weather information from RapidAPI for a given city name.
@@ -40,7 +38,6 @@ async function getCityInfo(cityName) {
    */
     const cityResponse = await fetch(cityUrl, cityOptions);
     const cityResult = await cityResponse.json();
-    console.log('City API Response:', cityResult);
 
     /**
      * Extracts the city data object from the RapidAPI GeoDB Cities API response.
@@ -106,10 +103,11 @@ app.get('/city-info', async (req, res) => {
   }
 });
 
-/**
- * Starts the server and listens for incoming requests on the specified port.
- */
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+// Add a basic route for the root path
+app.get('/', (req, res) => {
+  res.send('Weather API is running. Use /city-info?cityName=CITY_NAME to get weather information.');
 });
 
+// For Vercel serverless deployment, we don't use app.listen()
+// Instead, we export the Express app
+export default app;
