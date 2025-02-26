@@ -3,7 +3,7 @@
 This project is a web-based application that fetches and displays data about cities in South Africa and their current weather conditions. The data is retrieved using the Fetch API from two different sources: GeoDB Cities API for city details and Weatherbit API for weather information.
 
 ## Live Demo
-The application is deployed on Vercel and can be accessed at [https://city-weather-app-one.vercel.app/](https://city-weather-app-one.vercel.app/).
+The application is deployed on Vercel and can be accessed at [https://city-weather-app-sandy.vercel.app/](https://city-weather-app-sandy.vercel.app/).
 
 ## Technologies Used
 - Node.js
