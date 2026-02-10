@@ -372,6 +372,11 @@ footer {
         gap: 12px;
     }
 
+    .input-group:focus-within {
+        background: transparent;
+        border: none;
+    }
+
     input {
         width: 100%;
         background: var(--glass-bg);
@@ -379,6 +384,12 @@ footer {
         border-radius: 16px;
         backdrop-filter: blur(8px);
         padding: 14px 12px 14px 48px;
+        transition: var(--transition);
+    }
+
+    input:focus {
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.08);
     }
 
     .search-icon {
