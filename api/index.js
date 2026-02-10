@@ -2,12 +2,37 @@ import express from 'express';
 import fetch from 'node-fetch';
 import 'dotenv/config'
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import helmet from 'helmet';
+import { rateLimit } from 'express-rate-limit';
 
 /**
  * Creates an instance of the Express application and sets the port to 3000.
  */
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Security: Add Helmet for security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "script-src": ["'self'", "https://unpkg.com"],
+      "img-src": ["'self'", "data:", "https://*"],
+    },
+  },
+}));
+
+// Security: Rate limiting to prevent abuse
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+  standardHeaders: 'draft-7', // use `RateLimit-*` headers; cannot be used with `draft-6`
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+  message: { error: 'Too many requests from this IP, please try again after 15 minutes.' }
+});
+app.use('/city-info', limiter);
 
 // Enable CORS middleware
 app.use(cors());
@@ -18,96 +43,149 @@ app.use(cors());
 app.use(express.static('public'));
 
 /**
- * Retrieves city and weather information from RapidAPI for a given city name.
+ * Maps WMO weather codes to human-readable descriptions.
+ * Reference: https://open-meteo.com/en/docs
  */
-async function getCityInfo(cityName) {
-  const cityUrl = `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?countryIds=ZA&namePrefix=${encodeURIComponent(cityName)}`;
-  
-  const cityOptions = {
-    method: 'GET',
-    headers: {
-      'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
-      'X-RapidAPI-Host': 'wft-geo-db.p.rapidapi.com'
-    }
+function getWeatherDescription(code) {
+  const descriptions = {
+    0: 'Clear sky',
+    1: 'Mainly clear',
+    2: 'Partly cloudy',
+    3: 'Overcast',
+    45: 'Fog',
+    48: 'Depositing rime fog',
+    51: 'Light drizzle',
+    53: 'Moderate drizzle',
+    55: 'Dense drizzle',
+    56: 'Light freezing drizzle',
+    57: 'Dense freezing drizzle',
+    61: 'Slight rain',
+    63: 'Moderate rain',
+    65: 'Heavy rain',
+    66: 'Light freezing rain',
+    67: 'Heavy freezing rain',
+    71: 'Slight snow fall',
+    73: 'Moderate snow fall',
+    75: 'Heavy snow fall',
+    77: 'Snow grains',
+    80: 'Slight rain showers',
+    81: 'Moderate rain showers',
+    82: 'Violent rain showers',
+    85: 'Slight snow showers',
+    86: 'Heavy snow showers',
+    95: 'Thunderstorm',
+    96: 'Thunderstorm with slight hail',
+    99: 'Thunderstorm with heavy hail',
   };
+  return descriptions[code] || 'Unknown weather condition';
+}
+
+/**
+ * Retrieves city and weather information from Open-Meteo for a given city name.
+ */
+export async function getCityInfo(cityName) {
+  // Security: Sanitize cityName input
+  const sanitizedCityName = cityName.replace(/[<>]/g, '').trim();
+
+  if (!sanitizedCityName) {
+    throw new Error('City name is required');
+  }
+
+  // Use Open-Meteo Geocoding API to find city coordinates
+  const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(sanitizedCityName)}&count=1&language=en&format=json`;
 
   try {
+    const geoResponse = await fetch(geoUrl);
 
-  /**
-   * Makes a request to the RapidAPI GeoDB Cities API using the provided URL and options, and logs the response to the console.
-   */
-    const cityResponse = await fetch(cityUrl, cityOptions);
-    const cityResult = await cityResponse.json();
+    if (!geoResponse.ok) {
+      throw new Error(`Geocoding service error: ${geoResponse.statusText}`);
+    }
 
-    /**
-     * Extracts the city data object from the RapidAPI GeoDB Cities API response.
-     */
-    const cityData = cityResult.data && cityResult.data.length > 0 ? cityResult.data[0] : {};
-   
-    const weatherUrl = `https://weatherbit-v1-mashape.p.rapidapi.com/current?lat=${cityData.latitude}&lon=${cityData.longitude}&units=metric&lang=en`;
-  
-    const weatherOptions = {
-      method: 'GET',
-      headers: {
-        'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
-        'X-RapidAPI-Host': 'weatherbit-v1-mashape.p.rapidapi.com'
-      }
-    };
+    const geoResult = await geoResponse.json();
 
-    /**
-     * Makes a request to the weather API using the provided URL and options, and logs the response to the console.
-     */
-    const weatherResponse = await fetch(weatherUrl, weatherOptions);
+    if (!geoResult.results || geoResult.results.length === 0) {
+      const error = new Error(`City '${sanitizedCityName}' not found`);
+      error.status = 404;
+      throw error;
+    }
+
+    const cityData = geoResult.results[0];
+
+    // Use Open-Meteo Weather API to get current weather
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${cityData.latitude}&longitude=${cityData.longitude}&current=temperature_2m,weather_code,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m&timezone=auto`;
+
+    const weatherResponse = await fetch(weatherUrl);
+
+    if (!weatherResponse.ok) {
+      throw new Error(`Weather service error: ${weatherResponse.statusText}`);
+    }
+
     const weatherResult = await weatherResponse.json();
-    console.log('Weather API Response:', weatherResult);
+    console.log('Open-Meteo Weather API Response:', weatherResult);
 
-    /**
-     * Extracts the current weather data and description from the weather API response.
-     */
-    const weatherData = weatherResult && weatherResult.data && weatherResult.data.length > 0 ? weatherResult.data[0] : {};
-    const weatherDescription = weatherData.weather ? weatherData.weather.description : null;
+    const currentWeather = weatherResult.current || {};
+    const weatherDescription = getWeatherDescription(currentWeather.weather_code);
 
     /**
      * Creates an object containing information about the city and its current weather.
      */
     const cityInfo = {
-      city: cityData.city || "Not available",
-      region: cityData.region || "Not available",
+      city: cityData.name || "Not available",
+      region: cityData.admin1 || "Not available",
       country: cityData.country || "Not available",
       longitude: cityData.longitude || "Not available",
       latitude: cityData.latitude || "Not available",
       population: cityData.population || "Not available",
-      currentTemperature: weatherData.temp || "Not available",
-      weatherDescription: weatherDescription || "Not available"
+      currentTemperature: currentWeather.temperature_2m || "Not available",
+      weatherDescription: weatherDescription || "Not available",
+      weatherCode: currentWeather.weather_code, // Added for icon/background mapping
+      humidity: currentWeather.relative_humidity_2m,
+      feelsLike: currentWeather.apparent_temperature,
+      widthSpeed: currentWeather.wind_speed_10m,
+      pressure: currentWeather.surface_pressure
     };
     return cityInfo;
 
   } catch (error) {
-    console.log('Error:', error.message);
-
-    throw new Error('Failed to retrieve city information');
+    console.error(`Error fetching info for ${sanitizedCityName}:`, error.message);
+    throw error;
   }
 }
 
 /**
- * Handles GET requests to the '/city-info' endpoint, which retrieves city and weather information from RapidAPI.
+ * Handles GET requests to the '/city-info' endpoint, which retrieves city and weather information from Open-Meteo.
  */
 app.get('/city-info', async (req, res) => {
   const cityName = req.query.cityName;
+
+  if (!cityName) {
+    return res.status(400).json({ error: 'cityName parameter is required' });
+  }
 
   try {
     const cityInfo = await getCityInfo(cityName);
     res.json(cityInfo);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve city information' });
+    const status = error.status || 500;
+    res.status(status).json({ error: error.message || 'Failed to retrieve city information' });
   }
 });
 
 // Add a basic route for the root path
 app.get('/', (req, res) => {
-  res.send('Weather API is running. Use /city-info?cityName=CITY_NAME to get weather information.');
+  res.send('Arnold\'s SkyCast API is running. Use /city-info?cityName=CITY_NAME to get weather information.');
 });
 
 // For Vercel serverless deployment, we don't use app.listen()
 // Instead, we export the Express app
+// However, for local development, we add app.listen()
+const __filename = fileURLToPath(import.meta.url);
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(__filename);
+
+if (process.env.NODE_ENV !== 'production' && isMain) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
 export default app;

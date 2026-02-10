@@ -1,6 +1,6 @@
 ## City & Weather Information App
 
-This project is a web-based application that fetches and displays data about cities in South Africa and their current weather conditions. The data is retrieved using the Fetch API from two different sources: GeoDB Cities API for city details and Weatherbit API for weather information.
+This project is a web-based application that fetches and displays data about cities and their current weather conditions. The data is retrieved using the Open-Meteo APIs (Geocoding and Weather).
 
 ## Live Demo
 The application is deployed on Vercel and can be accessed at [https://city-weather-app-sandy.vercel.app/](https://city-weather-app-sandy.vercel.app/).
@@ -8,14 +8,14 @@ The application is deployed on Vercel and can be accessed at [https://city-weath
 ## Technologies Used
 - Node.js
 - Express.js
-- node-fetch
+- Open-Meteo API
 - HTML5
 - CSS
 - JavaScript
 - Vercel (for serverless deployment)
 
 ## Features
-- Search for any city in South Africa
+- Search for any city
 - View detailed city information (population, coordinates, etc.)
 - Get current weather conditions and temperature
 - Responsive design for mobile and desktop
@@ -25,7 +25,6 @@ The application is deployed on Vercel and can be accessed at [https://city-weath
 ### Prerequisites
 - Node.js (v14 or later)
 - npm (v6 or later)
-- A RapidAPI key for GeoDB Cities and Weatherbit APIs
 
 ### Local Development
 1. Clone the repository:
@@ -39,38 +38,15 @@ The application is deployed on Vercel and can be accessed at [https://city-weath
    npm install
    ```
 
-3. Create a `.env` file in the root directory with your RapidAPI key:
+3. Run the development server:
    ```
-   RAPIDAPI_KEY=your_rapidapi_key_here
-   ```
-
-4. Install Vercel CLI (optional, for local testing):
-   ```
-   npm i -g vercel
+   npm start
    ```
 
-5. Run the development server:
-   ```
-   vercel dev
-   ```
-   or
-   ```
-   node index.js
-   ```
-
-6. Open your browser and navigate to http://localhost:3000
-
-## Deployment on Vercel
-
-This project is configured for deployment on Vercel's serverless platform:
-
-1. Push your code to a GitHub repository
-2. Import the repository in Vercel dashboard
-3. Add your `RAPIDAPI_KEY` as an environment variable
-4. Deploy!
+4. Open your browser and navigate to http://localhost:3000
 
 ## Project Structure
-- `/api/index.js`: The server-side JavaScript file that handles API requests (configured for Vercel serverless)
+- `/api/index.js`: The server-side JavaScript file that handles API requests
 - `/public/index.html`: The HTML file that provides the frontend interface
 - `/public/script.js`: The client-side JavaScript for user interactions and API calls
 - `/public/style.css`: CSS styling for the frontend
@@ -78,24 +54,20 @@ This project is configured for deployment on Vercel's serverless platform:
 
 ## Development Roadmap
 The project is planned to be enhanced with:
-- Caching system for API responses
-- Loading states and improved error handling
-- Weather icons and expanded weather information
+- 24-hour weather forecast, starting from the current hour, vertically and scrollable
+- 7-day weather forecast, horizontally
 - Dark/light mode toggle
-- Favorite cities feature
-- 5-day weather forecast
+
 
 ## Known Limitations
-- Currently only supports cities in South Africa
 - Elevation data is not available from the current APIs
 - Limited error handling for edge cases
 
 ## References
+- [Open-Meteo Documentation](https://open-meteo.com/)
 - [Express.js Documentation](https://expressjs.com/)
 - [Node.js Documentation](https://nodejs.org/)
 - [Vercel Deployment Guide](https://vercel.com/guides/using-express-with-vercel)
-- [GeoDB Cities API](https://rapidapi.com/wirefreethought/api/geodb-cities)
-- [Weatherbit API](https://rapidapi.com/weatherbit/api/weatherbit-v1-mashape)
 
 ## License
 MIT License

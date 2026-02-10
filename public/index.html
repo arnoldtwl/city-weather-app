@@ -4,67 +4,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>City and Weather Information</title>
+    <title>The Daily Drift | Modern Weather Insights</title>
     <meta name="description"
-        content="City and Weather Information page. Get real-time information about any city and its weather in South Africa.">
-    <script src="script.js" defer></script>
-    <link rel="stylesheet" href="style.css">
+        content="Glassmorphism weather dashboard powered by Open-Meteo. Get precise city and weather data instantly.">
 
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 
-<body>
-    <!-- the header, main and footer elements are used to structure the page -->
-    <header>
-        <h2>South Africa Cities and Weather Information</h2>
-    </header>
+<body class="theme-default">
+    <div class="background-overlay"></div>
 
-    <main>
-        <p>Welcome to the City and Weather Information page. This page displays information about a city and its weather
-            in South Africa. Use the form below to search for a city and get real-time information about the city and
-            its weather.</p>
-        <!-- the form element is used to create an HTML form for user input -->
-        <form id="cityForm" aria-label="City Information Form">
-            <!-- the fieldset element is used to group related elements in a form -->
-            <fieldset>
-                <!-- the legend element is used to define a caption for the fieldset element -->
-                <legend>City Information Search:</legend>
-                <!-- the label element is used to define a label for an input element -->
-                <label for="cityInput">City Name:</label>
-                <!-- the input element is used to create an input control -->
-                <input type="text" name="city" id="cityInput" placeholder="Enter a city name" required>
-                <!-- the button element is used to create a clickable button -->
-                <button type="submit" name="submit">Submit</button>
-            </fieldset>
-        </form>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <i data-lucide="cloud-sun"></i>
+                <h1>The Daily Drift</h1>
+            </div>
+            <p class="subtitle">Real-time weather insights, elegantly delivered.</p>
+        </header>
 
-        <!-- the div element is used to group block-elements to format them with CSS -->
-        <div id="resultContainer" style="display: none;">
-            <!-- the section element is used to define sections in a document,
-            divide into two sections: city details and weather details -->
-            <section>
-                <h2>City Details:</h2>
-                <p>City Name: <span id="city"></span></p>
-                <p>Province: <span id="province"></span></p>
-                <p>Country: <span id="country"></span></p>
-                <p>Latitude: <span id="latitude"></span></p>
-                <p>Longitude: <span id="longitude"></span></p>
-                <p>Population: <span id="population"></span></p>
-                <!-- <p>Elevation: <span id="elevation"></span></p> -->
-            </section>
+        <main>
+            <form id="cityForm" class="search-box">
+                <div class="input-group">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="cityInput" placeholder="Search for a city..." required autocomplete="off">
+                    <button type="submit">Search</button>
+                </div>
+            </form>
 
-            <section>
-                <h2>Weather Details:</h2>
-                <p>Current Temperature: <span id="temperature"></span></p>
-                <p>Current Weather: <span id="weather"></span></p>
-            </section>
-        </div>
-    </main>
-    
-    <!-- the footer element is used to define a footer for a document or section -->
-    <footer>
-        <p>Created by: Arnold Twala</p>
-        <p>Contact information: <a href="mailto:arnoldtwl@gmail.com">arnoldtwl@gmail.com</a></p>
-    </footer>
+            <div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+                <div class="spinner"></div>
+                <p>Fetching weather data...</p>
+            </div>
+
+            <div id="errorContainer" class="error-card" style="display: none;">
+                <i data-lucide="alert-circle"></i>
+                <p id="errorMessage"></p>
+            </div>
+
+            <div id="resultContainer" class="glass-card" style="display: none;">
+                <div class="weather-main">
+                    <div class="weather-icon-large" id="weatherIconLarge">
+                        <!-- Icon will be injected here -->
+                    </div>
+                    <div class="temp-display">
+                        <span id="temperature" class="temp-value">--</span>
+                        <span class="temp-unit">°C</span>
+                    </div>
+                    <p id="weather" class="weather-desc">Loading...</p>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <i data-lucide="map-pin"></i>
+                        <div class="detail-info">
+                            <label>Location</label>
+                            <span id="city">--</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i data-lucide="navigation"></i>
+                        <div class="detail-info">
+                            <label>Region</label>
+                            <span id="province">--</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i data-lucide="globe"></i>
+                        <div class="detail-info">
+                            <label>Country</label>
+                            <span id="country">--</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i data-lucide="users"></i>
+                        <div class="detail-info">
+                            <label>Population</label>
+                            <span id="population">--</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i data-lucide="droplets"></i>
+                        <div class="detail-info">
+                            <label>Humidity</label>
+                            <span id="humidity">--</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i data-lucide="thermometer"></i>
+                        <div class="detail-info">
+                            <label>Feels Like</label>
+                            <span id="feelsLike">--</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i data-lucide="wind"></i>
+                        <div class="detail-info">
+                            <label>Wind Speed</label>
+                            <span id="windSpeed">--</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i data-lucide="gauge"></i>
+                        <div class="detail-info">
+                            <label>Pressure</label>
+                            <span id="pressure">--</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i data-lucide="move"></i>
+                        <div class="detail-info">
+                            <label>Coordinates</label>
+                            <span class="coord-val">Lat: <span id="latitude">--</span></span>
+                            <span class="coord-val">Lon: <span id="longitude">--</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <p>&copy; 2026 Arnoldtwl. Built with Open-Meteo.</p>
+                <div class="footer-links">
+                    <a href="mailto:arnoldtwl@gmail.com"><i data-lucide="mail"></i> Contact</a>
+                </div>
+            </div>
+        </footer>
+    </div>
 </body>
 
 </html>
