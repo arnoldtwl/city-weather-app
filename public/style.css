@@ -362,6 +362,36 @@ footer {
         font-size: 2rem;
     }
 
+    .input-group {
+        flex-direction: column;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        backdrop-filter: none;
+        padding: 0;
+        gap: 12px;
+    }
+
+    input {
+        width: 100%;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        backdrop-filter: blur(8px);
+        padding: 14px 12px 14px 48px;
+    }
+
+    .search-icon {
+        top: 15px;
+    }
+
+    button {
+        width: fit-content;
+        align-self: center;
+        padding: 14px 32px;
+        font-size: 1.1rem;
+    }
+
     .temp-value {
         font-size: 4rem;
     }
