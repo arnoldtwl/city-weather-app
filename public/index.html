@@ -130,13 +130,37 @@
                             <span class="coord-val">Lon: <span id="longitude">--</span></span>
                         </div>
                     </div>
+                    <div class="detail-item">
+                        <i data-lucide="mountain"></i>
+                        <div class="detail-info">
+                            <label>Elevation</label>
+                            <span id="elevation">--</span>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <div class="forecast-container glass-card" style="display: none;">
+                <h3>24-Hour Forecast</h3>
+                <div id="hourlyForecast" class="forecast-list">
+                    <!-- Forecast items injected here via JS -->
+                </div>
+            </div>
+
+            <div class="daily-forecast-container glass-card" style="display: none;">
+                <div id="dailyForecast" class="daily-forecast-list">
+                    <!-- Daily forecast items injected here via JS -->
+                </div>
+            </div>
+
         </main>
+
 
         <footer>
             <div class="footer-content">
-                <p>&copy; 2026 Arnoldtwl. Built with Open-Meteo.</p>
+                <p>&copy; 2026 <a href="https://www.arnoldtwl.com" target="_blank" rel="noopener noreferrer"
+                        style="color: inherit; font-weight: 500; text-decoration: none;">Arnoldtwl</a>. Built with
+                    Open-Meteo.</p>
                 <div class="footer-links">
                     <a href="mailto:arnoldtwl@gmail.com"><i data-lucide="mail"></i> Contact</a>
                 </div>

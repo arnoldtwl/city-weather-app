@@ -111,8 +111,8 @@ export async function getCityInfo(cityName) {
 
     const cityData = geoResult.results[0];
 
-    // Use Open-Meteo Weather API to get current weather
-    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${cityData.latitude}&longitude=${cityData.longitude}&current=temperature_2m,weather_code,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m&timezone=auto`;
+    // Use Open-Meteo Weather API to get current weather, 2 days of hourly forecasts, and 7 days of daily forecasts (including yesterday)
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${cityData.latitude}&longitude=${cityData.longitude}&current=temperature_2m,weather_code,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m,is_day&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&past_days=1&forecast_days=7&timezone=auto`;
 
     const weatherResponse = await fetch(weatherUrl);
 
@@ -121,10 +121,48 @@ export async function getCityInfo(cityName) {
     }
 
     const weatherResult = await weatherResponse.json();
-    console.log('Open-Meteo Weather API Response:', weatherResult);
+    console.log('Open-Meteo Weather API Response:', weatherResult.current);
 
     const currentWeather = weatherResult.current || {};
     const weatherDescription = getWeatherDescription(currentWeather.weather_code);
+
+    // Process hourly data to get the next 24 hours starting from the next hour
+    const hourlyData = weatherResult.hourly || { time: [], temperature_2m: [], weather_code: [], precipitation_probability: [] };
+    const currentTimeLocal = currentWeather.time || new Date().toISOString(); // Open-Meteo returns '2026-02-21T07:45'
+
+    // Find the index of the next hour
+    let startIndex = 0;
+    for (let i = 0; i < hourlyData.time.length; i++) {
+      // Find the first hourly timestamp that is strictly strictly greater than the current local time
+      if (hourlyData.time[i] > currentTimeLocal) {
+        startIndex = i;
+        break;
+      }
+    }
+
+    const next24Hours = [];
+    for (let i = startIndex; i < startIndex + 24 && i < hourlyData.time.length; i++) {
+      next24Hours.push({
+        time: hourlyData.time[i],
+        temperature: hourlyData.temperature_2m[i],
+        weatherCode: hourlyData.weather_code[i],
+        precipitationProb: hourlyData.precipitation_probability[i] || 0
+      });
+    }
+
+    // Process daily data
+    const dailyData = weatherResult.daily || { time: [], weather_code: [], temperature_2m_max: [], temperature_2m_min: [], precipitation_probability_max: [] };
+    const dailyForecast = [];
+
+    for (let i = 0; i < dailyData.time.length; i++) {
+      dailyForecast.push({
+        date: dailyData.time[i],
+        weatherCode: dailyData.weather_code[i],
+        maxTemp: dailyData.temperature_2m_max[i],
+        minTemp: dailyData.temperature_2m_min[i],
+        precipitationProb: dailyData.precipitation_probability_max[i] || 0
+      });
+    }
 
     /**
      * Creates an object containing information about the city and its current weather.
@@ -135,14 +173,18 @@ export async function getCityInfo(cityName) {
       country: cityData.country || "Not available",
       longitude: cityData.longitude || "Not available",
       latitude: cityData.latitude || "Not available",
+      elevation: cityData.elevation !== undefined ? cityData.elevation : "Not available",
       population: cityData.population || "Not available",
       currentTemperature: currentWeather.temperature_2m || "Not available",
       weatherDescription: weatherDescription || "Not available",
       weatherCode: currentWeather.weather_code, // Added for icon/background mapping
+      isDay: currentWeather.is_day, // 1 for Day, 0 for Night
       humidity: currentWeather.relative_humidity_2m,
       feelsLike: currentWeather.apparent_temperature,
       widthSpeed: currentWeather.wind_speed_10m,
-      pressure: currentWeather.surface_pressure
+      pressure: currentWeather.surface_pressure,
+      hourlyForecast: next24Hours,
+      dailyForecast: dailyForecast
     };
     return cityInfo;
 
